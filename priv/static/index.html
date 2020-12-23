@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Elixir+YOLOv3テスト</title>
+    <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <!-- <script src="js/app.js"></script> -->
+    <!-- <link rel="stylesheet" href="css/app.css"> -->
+    <style type="text/css">
+      #overlay {
+        position: relative;
+      }
+      #photo {
+        width: 640px;
+        height: auto;
+        position: absolute;
+        z-index: 1;
+      }
+      #result {
+        position: absolute;
+        z-index: 2;
+      }
+      #panel {
+        padding-top: 500px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="overlay">
+      <img id="photo" src="/photo.jpg">
+      <canvas id="result"></canvas>
+    </div>
+    <div id="panel">
+      画像:<input type="file" id="predict">
+      <pre id="answer"></pre>
+    </div>
+
+    <script>
+      function draw_result(data) {
+        return function () {
+          var w = $('#photo').width()
+          var h = $('#photo').height()
+          
+          var canvas = document.getElementById("result")
+          canvas.width  = w
+          canvas.height = h
+          var ctx = canvas.getContext('2d')
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+          ctx.lineWidth   = "2";
+          ctx.strokeStyle = "red"
+
+          ans = data.ans
+          for (var item in ans) {
+            console.log(item)
+            boxes = ans[item]
+            for (var index in boxes) {
+              box = boxes[index]
+              x0 = Math.round(w*box[0])
+              y0 = Math.round(h*box[1])
+              x1 = Math.round(w*box[2])
+              y1 = Math.round(h*box[3])
+              ctx.strokeRect(x0, y0, x1-x0+1, y1-y0+1)
+              console.log(x0, y0, x1, y1)
+            }
+          }
+        }
+      }
+      $('#predict').change(function() {
+          var fd = new FormData();
+          fd.append("photo", $(this).prop('files')[0]);
+          $.ajax({
+              url: "/predict_photo",
+              type: "POST",
+              data: fd,
+              processData: false,
+              contentType: false,
+              dataType: 'json'
+          })
+          .done(function(data) {
+              $("#answer").html(JSON.stringify(data))
+              $("#photo").on('load', draw_result(data))
+              $("#photo").attr("src", "/photo.jpg?timestamp=" + new Date().getTime());
+          });
+          return false;
+      });
+    </script>
+  </body>
+</html>
