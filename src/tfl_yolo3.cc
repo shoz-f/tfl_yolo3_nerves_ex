@@ -139,7 +139,7 @@ typedef list<const Box*> Boxes;
 Boxes
 non_maximum_suppression(int class_id, const vector<Box>& db_candidates, float threshold=0.25, float iou_threshold=0.5)
 {
-    // pick up box form db_candidates and make a list with it in order of score.
+    // pick up box from db_candidates and make a list with it in order of score.
     Boxes prior;
     for (const auto& box : db_candidates) {
         float my_score = box.score(class_id);
@@ -234,8 +234,10 @@ predict(unique_ptr<Interpreter>& interpreter, const vector<string>& args, json& 
 
     typedef CImg<unsigned char> CImgU8;
     try {
+        // load target image
         CImgU8 img(args[0].c_str());
 
+        // save image sacle factor for post process
         if (gSys.mNormalize) {
             scale[0] = 1.0 / width;
             scale[1] = 1.0 / height;
@@ -257,6 +259,7 @@ predict(unique_ptr<Interpreter>& interpreter, const vector<string>& args, json& 
 
         cimg_forXY(formed_img, x, y) {
         cimg_forC(formed_img, c) {
+            // normalize the intensity of pixel and set it to the input tensor
             *input++ = formed_img(x, y, c)/255.0;
         }}
         
@@ -271,13 +274,15 @@ predict(unique_ptr<Interpreter>& interpreter, const vector<string>& args, json& 
     
     // predict
     if (interpreter->Invoke() == kTfLiteOk) {
-        // get result
+        // get result from the output tensors
         const TfLiteTensor *otensor0, *otensor1;
         if (gSys.mTiny) {
+            // tiny model results
             otensor0 = interpreter->output_tensor(1);   // BBOX
             otensor1 = interpreter->output_tensor(0);   // score each COCOs
         }
         else {
+            // full model results
             otensor0 = interpreter->output_tensor(0);   // BBOX
             otensor1 = interpreter->output_tensor(1);   // score each COCOs
         }
@@ -287,7 +292,7 @@ predict(unique_ptr<Interpreter>& interpreter, const vector<string>& args, json& 
             save_tensor<float>(otensor1, base+"_output1.npy");
         }
 
-        // post processing
+        // do post processing
         post_yolo3(
             result,
             size_of_dimension(otensor0, 1),

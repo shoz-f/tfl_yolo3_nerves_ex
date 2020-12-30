@@ -5,6 +5,7 @@ Tensorflow lite YOLO v3 application in Elixir
 ## Platform
 - Windows MSYS2/MinGW64
 - Ubuntu on WSL2
+- Nerves on Raspberry Pi3
 
 ## Requirement
 It needs following libraries to build this application.
@@ -23,6 +24,9 @@ $ pacman -S mingw-w64-x86_64-libjpeg-turbo
 $ pacman -S mingw-w64-x86_64-dlfcn
 $ pacman -S mingw-w64-x86_64-nlohmann-json
 ```
+
+Nerves on Raspberry Pi3:
+see next sction.
 
 #### Libraries in source package:
 - CImg:           http://cimg.eu/download.shtml
@@ -49,6 +53,13 @@ $ cd ./extra
 $ source setup_wsl_extra.sh
 ```
 
+Nerves on Raspberry Pi3:
+
+```bash
+$ cd ./extra
+$ source setup_nerves_extra.sh
+```
+
 ## Where can i get YOLO v3 model for Tensorflow lite?
 You can find the "yolov3-416.tflite" on the Release page in this repository.<br>
 Donwload it and put it into "./priv" of the project.
@@ -67,10 +78,11 @@ tfl_interp [opts] <model.tflite>
     -d <num> : diagnosis output (ableable in both teminal/ports mode)
                num = 1 - save formed image (resized 416x416 in YOLO v3)
                      2 - save model's input/ouput tensors (npy format)
+                     4 - save result of the prediction
 ```
 
 In teminal mode, without "-p" option, "tfl_interp" puts a prompt sign ">" on your terminal
-and you input subcommands in it. 
+and you can input subcommands in it. 
 
 ```
 SUBCOMMANDs:
