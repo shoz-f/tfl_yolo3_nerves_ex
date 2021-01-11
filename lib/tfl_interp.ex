@@ -1,4 +1,4 @@
-defmodule TflYolo3.TflInterp do
+defmodule TflInterp do
   use GenServer
   
   @timeout 300000
@@ -22,10 +22,11 @@ defmodule TflYolo3.TflInterp do
   def init(opts) do
     executable = Application.app_dir(:tfl_yolo3, "priv/tfl_interp")
     tfl_model  = Application.app_dir(:tfl_yolo3, Keyword.get(opts, :model))
+    tfl_label  = Application.app_dir(:tfl_yolo3, Keyword.get(opts, :label))
     tfl_opts   = Keyword.get(opts, :opts, "")
 
     port = Port.open({:spawn_executable, executable}, [
-      {:args, String.split(tfl_opts) ++ ["-p", tfl_model]},
+      {:args, String.split(tfl_opts) ++ ["-p", tfl_model, tfl_label]},
       {:packet, 4},
       :binary
     ])

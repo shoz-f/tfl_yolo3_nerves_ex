@@ -1,7 +1,7 @@
 defmodule TflYolo3.Router do
   use Plug.Router
   
-  alias TflYolo3.TflInterp
+  alias TflInterp
 
   @photo_file if Mix.target() == :host, do: Application.app_dir(:tfl_yolo3, "priv/photo.jpg"), else: "/root/photo.jpg" 
   @opening     Application.app_dir(:tfl_yolo3, "priv/photo.jpg")

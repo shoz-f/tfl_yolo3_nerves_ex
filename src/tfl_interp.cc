@@ -15,6 +15,7 @@
 #include <memory>
 #include <iterator>
 #include <regex>
+#include <vector>
 using namespace std;
 
 #ifdef _WIN32
@@ -194,9 +195,9 @@ parse_cmd_line(const string& cmd_line, vector<string>& args)
 **/
 /**************************************************************************{{{*/
 void
-interp(string& tfl_model)
+interp(string& tfl_model, string& tfl_label)
 {
-    // initialize tensor flow lite
+    // load tensor flow lite model
     unique_ptr<tflite::FlatBufferModel> model =
         tflite::FlatBufferModel::BuildFromFile(tfl_model.c_str());
 
@@ -208,6 +209,17 @@ interp(string& tfl_model)
     if (interpreter->AllocateTensors() != kTfLiteOk) {
         cerr << "error: AllocateTensors()\n";
         exit(1);
+    }
+
+    // load labels
+    string   label;
+    ifstream lb_file(tfl_label);
+    if (lb_file.fail()) {
+        cerr << "error: Failed to open file\n";
+        exit(1);
+    }
+    while (getline(lb_file, label)) {
+        gSys.mLabel.emplace_back(label);
     }
 
     // REPL
@@ -235,6 +247,8 @@ interp(string& tfl_model)
             result["model"] = gSys.mTflModel;
             result["mode"]  = gSys.mPortMode ? "Ports" : "Terminal";
         }
+        else if (command == "label") {
+        }
         else {
             result["unknown"] = command;
         }
@@ -257,7 +271,7 @@ interp(string& tfl_model)
 void usage()
 {
     cout
-      << "tfl_interp [opts] <model.tflite>\n"
+      << "tfl_interp [opts] <model.tflite> <class.label>\n"
       << "\toption:\n"
       << "\t  -p       : Elixir/Erlang Ports interface\n"
       << "\t  -n       : Normalize BBox predictions by 1.0x1.0\n"
@@ -323,6 +337,7 @@ main(int argc, char* argv[])
     // save exe infomations
     gSys.mExe.assign(argv[0]);
     gSys.mTflModel.assign(argv[optind]);
+    gSys.mTflLabel.assign(argv[optind+1]);
 
     // initialize i/o
     cin.exceptions(ios_base::badbit|ios_base::failbit|ios_base::eofbit);
@@ -342,7 +357,7 @@ main(int argc, char* argv[])
     }
 
     // run interpreter
-    interp(gSys.mTflModel);
+    interp(gSys.mTflModel, gSys.mTflLabel);
 
     return 0;
 }

@@ -32,8 +32,6 @@ using namespace tflite;
 #include "tfl_interp.h"
 #include "tfl_helper.h"
 
-#include "coco.names"
-
 /***  Class Header  *******************************************************}}}*/
 /**
 * bounding box
@@ -179,17 +177,19 @@ non_maximum_suppression(int class_id, const vector<Box>& db_candidates, float th
 void
 post_yolo3(json& result, int count, const float* boxes, const float* scores, float scale[2], float threshold=0.25, float iou_threshold=0.5)
 {
+    const size_t LABELS_MAX = gSys.mLabel.size();
+
     // leave only candidates above the threshold.
     vector<Box> db_candidates;
-    for (int i = 0; i < count; i++, boxes += 4, scores += COCO_NAMES_MAX) {
-        if (any_one_above(COCO_NAMES_MAX, scores, threshold)) {
+    for (int i = 0; i < count; i++, boxes += 4, scores += LABELS_MAX) {
+        if (any_one_above(LABELS_MAX, scores, threshold)) {
             db_candidates.emplace_back(scores, boxes);
         }
     }
     
     // run nms over each classification class.
     bool nothing = true;
-    for (int class_id = 0; class_id < COCO_NAMES_MAX; class_id++) {
+    for (int class_id = 0; class_id < LABELS_MAX; class_id++) {
         auto res = non_maximum_suppression(class_id, db_candidates, threshold, iou_threshold);
         if (res.empty()) { continue; }
 
@@ -199,7 +199,7 @@ post_yolo3(json& result, int count, const float* boxes, const float* scores, flo
         for (const auto* box : res) {
             jboxes.push_back(box->put_json(scale[0], scale[1]));
         }
-        result[gCocoNames[class_id]] = jboxes;
+        result[gSys.mLabel[class_id]] = jboxes;
     }
     if (nothing) {
         result["error"] = "can't find any objects";

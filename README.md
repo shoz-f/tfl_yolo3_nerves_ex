@@ -1,11 +1,10 @@
 # Tensorflow lite YOLO v3 for Elixir
 
-Tensorflow lite YOLO v3 application in Elixir
+Tensorflow lite YOLO v3 application in Elixir/Nerves rpi3
 
 ## Platform
-- Windows MSYS2/MinGW64
-- Ubuntu on WSL2
 - Nerves on Raspberry Pi3
+- Ubuntu on WSL2
 
 ## Requirement
 It needs following libraries to build this application.
@@ -65,13 +64,14 @@ You can find the "yolov3-416.tflite" on the Release page in this repository.<br>
 Donwload it and put it into "./priv" of the project.
 
 Or, you can convert the Tensorflow YOLO v3 model to tflite also.
+I include here the Jupyter notebook about getting YOLO v3 tflite model from Tensorflow one under Google Colaboratory for your convenience.
 
 ## About tfl_interp executable
 "tfl_interp" is stand alone executable. It means that you can run "tfl_interp"
 in your terminal without Elixir. It's comand line usage is here:
 
 ```
-tfl_interp [opts] <model.tflite>
+tfl_interp [opts] <model.tflite> <class.label>
   <model.tflite>  -  Tensorflow lite model file
   [opts]
     -p       : switch to Elixir Ports mode from Terminal mode
